@@ -1,0 +1,25 @@
+import pyshark
+from scapy.all import *
+
+def get_wifi_interface():
+    """
+    Gets the name of the WiFi interface
+    """
+    return get_if_list()[1]
+
+def packet_handler(packet):
+    """
+    Handles packets captured by the WiFi interface
+    """
+    if packet.haslayer(Dot11):
+        if packet.type == 0 and packet.subtype == 8:
+            print("Beacon Frame Detected:")
+            print("SSID: ", packet.info.decode())
+            print("BSSID: ", packet.addr3)
+
+if __name__ == "__main__":
+    wifi_interface = get_wifi_interface()
+    print(f"Using WiFi interface: {wifi_interface}")
+
+    capture = pyshark.LiveCapture(interface=wifi_interface)
+    capture.apply_on_packets(packet_handler)
